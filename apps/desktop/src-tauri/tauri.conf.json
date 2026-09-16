@@ -16,13 +16,14 @@
         "title": "Apsara",
         "width": 420,
         "height": 680,
-        "transparent": false,
-        "decorations": true,
+        "transparent": true,
+        "decorations": false,
         "alwaysOnTop": true,
         "resizable": true,
         "shadow": false,
         "center": true,
-        "visible": true
+        "visible": true,
+        "label": "main"
       }
     ],
     "security": {

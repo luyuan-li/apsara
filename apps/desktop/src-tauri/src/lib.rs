@@ -1,6 +1,11 @@
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::TrayIconBuilder,
+    Manager,
+};
 
 #[derive(Debug, Serialize)]
 struct FsError {
@@ -45,13 +50,20 @@ fn is_allowed(path: &Path) -> Result<(), String> {
 }
 
 fn move_to_trash(path: &Path) -> Result<(), String> {
-    // Prefer macOS `trash` (Sequoia+); fallback to Finder AppleScript.
-    if Command::new("trash").arg(path).status().map(|s| s.success()).unwrap_or(false) {
+    if Command::new("trash")
+        .arg(path)
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+    {
         return Ok(());
     }
     let script = format!(
         "tell application \"Finder\" to delete (POSIX file \"{}\" as alias)",
-        path.display().to_string().replace('\\', "\\\\").replace('"', "\\\"")
+        path.display()
+            .to_string()
+            .replace('\\', "\\\\")
+            .replace('"', "\\\"")
     );
     let status = Command::new("osascript")
         .args(["-e", &script])
@@ -71,9 +83,7 @@ fn trash_path(path: String) -> Result<String, String> {
         return Err(format!("file not found: {}", expanded.display()));
     }
     is_allowed(&expanded)?;
-    let absolute = expanded
-        .canonicalize()
-        .map_err(|e| e.to_string())?;
+    let absolute = expanded.canonicalize().map_err(|e| e.to_string())?;
     move_to_trash(&absolute)?;
     Ok(absolute.display().to_string())
 }
@@ -94,6 +104,58 @@ fn list_desktop() -> Result<Vec<String>, String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .setup(|app| {
+            let show_i = MenuItem::with_id(app, "show", "显示窗口", true, None::<&str>)?;
+            let hide_i = MenuItem::with_id(app, "hide", "隐藏窗口", true, None::<&str>)?;
+            let lock_i = MenuItem::with_id(app, "lock", "锁定（可点）", true, None::<&str>)?;
+            let pierce_i = MenuItem::with_id(app, "pierce", "穿透（点穿空白）", true, None::<&str>)?;
+            let quit_i = MenuItem::with_id(app, "quit", "退出 Apsara", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&show_i, &hide_i, &lock_i, &pierce_i, &quit_i])?;
+
+            let icon = app
+                .default_window_icon()
+                .cloned()
+                .ok_or_else(|| "missing window icon for tray".to_string())?;
+
+            let _tray = TrayIconBuilder::with_id("apsara-tray")
+                .icon(icon)
+                .menu(&menu)
+                .tooltip("Apsara")
+                .show_menu_on_left_click(true)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "quit" => {
+                        app.exit(0);
+                    }
+                    "show" => {
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.show();
+                            let _ = w.set_focus();
+                            let _ = w.set_ignore_cursor_events(false);
+                        }
+                    }
+                    "hide" => {
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.hide();
+                        }
+                    }
+                    "lock" => {
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.set_ignore_cursor_events(false);
+                            let _ = w.show();
+                            let _ = w.set_focus();
+                        }
+                    }
+                    "pierce" => {
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.set_ignore_cursor_events(true);
+                        }
+                    }
+                    _ => {}
+                })
+                .build(app)?;
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![trash_path, list_desktop])
         .run(tauri::generate_context!())
         .expect("error while running Apsara");

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import PetStage from "./components/PetStage.vue";
 import ChatPanel from "./components/ChatPanel.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
@@ -20,6 +21,16 @@ const messages = ref<Msg[]>([
 const pending = ref<{ path: string } | null>(null);
 const busy = ref(false);
 const locked = ref(true);
+
+/** locked=true → receive clicks; locked=false → click-through (穿透) */
+async function applyClickThrough() {
+  try {
+    await getCurrentWindow().setIgnoreCursorEvents(!locked.value);
+  } catch (e) {
+    console.warn("setIgnoreCursorEvents failed", e);
+  }
+}
+
 const chromeOpen = ref(false);
 const storeOpen = ref(false);
 const zoom = ref(1);
@@ -60,6 +71,18 @@ async function refreshCatalog() {
 onMounted(async () => {
   await refreshCatalog();
   window.addEventListener("keydown", onKey);
+  await applyClickThrough();
+});
+
+watch(locked, () => {
+  void applyClickThrough();
+});
+
+// Opening UI must disable click-through so panels stay clickable
+watch([chromeOpen, storeOpen], ([chrome, store]) => {
+  if (chrome || store) {
+    locked.value = true;
+  }
 });
 onUnmounted(() => window.removeEventListener("keydown", onKey));
 
@@ -152,8 +175,13 @@ function onSelectSkin(s: SkinItem) {
       </div>
       <div class="actions">
         <button type="button" class="chip" @click="openStore">皮肤仓库</button>
-        <button type="button" class="chip quiet" @click="locked = !locked">
-          {{ locked ? "锁定" : "穿透" }}
+        <button
+          type="button"
+          class="chip quiet"
+          :title="locked ? '当前锁定：可点击。点此切换为穿透' : '当前穿透：空白处点穿。点此锁定'"
+          @click="locked = !locked"
+        >
+          {{ locked ? "穿透" : "锁定" }}
         </button>
         <button type="button" class="chip quiet" @click="chromeOpen = false">收起</button>
       </div>
