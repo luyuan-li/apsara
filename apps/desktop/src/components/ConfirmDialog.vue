@@ -6,6 +6,7 @@ defineEmits<{ confirm: []; cancel: [] }>();
 <template>
   <div class="mask">
     <div class="card" role="dialog" aria-modal="true">
+      <div class="accent" aria-hidden="true" />
       <h2>{{ title }}</h2>
       <p>{{ body }}</p>
       <div class="actions">
@@ -20,29 +21,41 @@ defineEmits<{ confirm: []; cancel: [] }>();
 .mask {
   position: absolute;
   inset: 0;
-  background: rgba(40, 24, 16, 0.35);
+  background: rgba(40, 24, 16, 0.38);
+  backdrop-filter: blur(3px);
   display: grid;
   place-items: center;
   z-index: 20;
+  padding: 16px;
 }
 .card {
-  width: min(320px, 90%);
-  background: #fffaf4;
-  border-radius: 14px;
-  padding: 16px;
+  position: relative;
+  width: min(320px, 100%);
+  overflow: hidden;
+  background: linear-gradient(180deg, #fffaf4, #fff3e8);
+  border-radius: 16px;
+  padding: 18px 16px 14px;
   border: 1px solid rgba(180, 120, 80, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+}
+.accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--azure), var(--blush), var(--gold));
 }
 h2 {
   margin: 0 0 8px;
-  font-size: 16px;
-  color: #5a321f;
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 650;
 }
 p {
-  margin: 0 0 14px;
-  font-size: 13px;
-  color: #6a4535;
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
   word-break: break-all;
+  line-height: 1.45;
 }
 .actions {
   display: flex;
@@ -50,18 +63,21 @@ p {
   gap: 8px;
 }
 button {
-  border-radius: 10px;
-  padding: 6px 12px;
+  border-radius: 11px;
+  padding: 7px 14px;
   cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 550;
 }
 .ghost {
-  border: 1px solid #d0b09a;
+  border: 1px solid rgba(168, 123, 69, 0.35);
   background: transparent;
-  color: #6a4535;
+  color: var(--ink-soft);
 }
 .primary {
   border: 0;
-  background: #c47a4a;
+  background: linear-gradient(180deg, #d4a06a, #b87d45);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(168, 123, 69, 0.28);
 }
 </style>
