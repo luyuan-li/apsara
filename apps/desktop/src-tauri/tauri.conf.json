@@ -14,12 +14,13 @@
     "windows": [
       {
         "title": "Apsara",
-        "width": 380,
-        "height": 640,
+        "width": 420,
+        "height": 680,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,
-        "resizable": true
+        "resizable": true,
+        "shadow": false
       }
     ],
     "security": {
