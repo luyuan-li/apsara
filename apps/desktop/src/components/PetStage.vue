@@ -40,13 +40,13 @@ onBeforeUnmount(() => {
 <style scoped>
 .stage {
   flex: 1;
-  min-height: 200px;
+  min-height: 210px;
   display: grid;
   place-items: center;
 }
 .host {
-  width: min(280px, 85%);
-  height: min(320px, 55vh);
+  width: min(300px, 88%);
+  height: min(340px, 56vh);
   position: relative;
 }
 .host :deep(canvas),
@@ -55,6 +55,6 @@ onBeforeUnmount(() => {
   height: 100%;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 12px 22px rgba(90, 50, 30, 0.22));
+  filter: drop-shadow(0 14px 26px rgba(90, 50, 30, 0.2));
 }
 </style>
