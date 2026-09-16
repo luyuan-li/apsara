@@ -11,6 +11,9 @@ export async function createGuofengStage(
   img.style.width = "100%";
   img.style.height = "100%";
   img.style.objectFit = "contain";
+  img.style.background = "transparent";
+  img.style.border = "0";
+  img.style.outline = "none";
   img.style.animation = "apsara-float 4.5s ease-in-out infinite";
   host.appendChild(img);
 
@@ -19,8 +22,8 @@ export async function createGuofengStage(
     style.id = "apsara-float-style";
     style.textContent = `
 @keyframes apsara-float {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-10px) rotate(1deg); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }`;
     document.head.appendChild(style);
   }
