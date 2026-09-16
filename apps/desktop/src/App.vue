@@ -126,6 +126,14 @@ function onPetActivate() {
 async function onHideWindow() {
   try {
     await getCurrentWindow().hide();
+    try {
+      await invoke("notify", {
+        title: "Apsara 已隐藏",
+        body: "点菜单栏图标可重新显示",
+      });
+    } catch {
+      /* optional */
+    }
   } catch (e) {
     console.warn("hide failed", e);
   }

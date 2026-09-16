@@ -100,13 +100,34 @@ fn list_desktop() -> Result<Vec<String>, String> {
     Ok(names)
 }
 
+#[tauri::command]
+fn notify(title: String, body: String) -> Result<(), String> {
+    fn esc(s: &str) -> String {
+        s.replace('\\', "\\\\").replace('"', "\\\"")
+    }
+    let source = format!(
+        "display notification \"{}\" with title \"{}\"",
+        esc(&body),
+        esc(&title)
+    );
+    let status = Command::new("osascript")
+        .args(["-e", &source])
+        .status()
+        .map_err(|e| e.to_string())?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err("notification failed".into())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
-            let show_i = MenuItem::with_id(app, "show", "显示窗口", true, None::<&str>)?;
-            let hide_i = MenuItem::with_id(app, "hide", "隐藏窗口", true, None::<&str>)?;
+            let show_i = MenuItem::with_id(app, "show", "显示窗口（隐藏后点这里）", true, None::<&str>)?;
+            let hide_i = MenuItem::with_id(app, "hide", "隐藏到菜单栏", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "退出 Apsara", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_i, &hide_i, &quit_i])?;
 
@@ -118,8 +139,8 @@ pub fn run() {
             let _tray = TrayIconBuilder::with_id("apsara-tray")
                 .icon(icon)
                 .menu(&menu)
-                .tooltip("Apsara")
-                .show_menu_on_left_click(true)
+                .tooltip("Apsara — 左键显示，右键菜单")
+                .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "quit" => {
                         app.exit(0);
@@ -138,6 +159,29 @@ pub fn run() {
                     }
                     _ => {}
                 })
+                .on_tray_icon_event(|tray, event| {
+                    use tauri::Manager;
+                    use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
+                    match event {
+                        TrayIconEvent::Click {
+                            button: MouseButton::Left,
+                            button_state: MouseButtonState::Up,
+                            ..
+                        }
+                        | TrayIconEvent::DoubleClick {
+                            button: MouseButton::Left,
+                            ..
+                        } => {
+                            let app = tray.app_handle();
+                            if let Some(w) = app.get_webview_window("main") {
+                                let _ = w.set_ignore_cursor_events(false);
+                                let _ = w.show();
+                                let _ = w.set_focus();
+                            }
+                        }
+                        _ => {}
+                    }
+                })
                 .build(app)?;
 
             if let Some(w) = app.get_webview_window("main") {
@@ -146,7 +190,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![trash_path, list_desktop])
+        .invoke_handler(tauri::generate_handler![trash_path, list_desktop, notify])
         .run(tauri::generate_context!())
         .expect("error while running Apsara");
 }

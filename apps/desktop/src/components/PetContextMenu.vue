@@ -24,7 +24,7 @@ const emit = defineEmits<{
       <li><button type="button" @click="emit('openStore')">皮肤仓库</button></li>
       <li><button type="button" @click="emit('randomExpression')">随机表情</button></li>
       <li class="sep" />
-      <li><button type="button" @click="emit('hideWindow')">隐藏窗口</button></li>
+      <li><button type="button" @click="emit('hideWindow')">隐藏到菜单栏</button></li>
     </ul>
   </div>
 </template>
