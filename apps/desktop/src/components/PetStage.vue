@@ -34,8 +34,20 @@ async function mountSkin() {
 
 function onWheel(e: WheelEvent) {
   e.preventDefault();
-  const delta = e.deltaY > 0 ? -0.08 : 0.08;
-  emit("zoom", (props.zoom ?? 1) + delta);
+  // Trackpads send many pixel deltas; dampen heavily so zoom feels gentle.
+  let step: number;
+  if (e.deltaMode === 1) {
+    // line mode (classic mouse wheel)
+    step = e.deltaY > 0 ? -0.04 : 0.04;
+  } else if (e.deltaMode === 2) {
+    // page mode
+    step = e.deltaY > 0 ? -0.08 : 0.08;
+  } else {
+    // pixel mode — typical Mac trackpad
+    step = -e.deltaY * 0.0008;
+    step = Math.max(-0.035, Math.min(0.035, step));
+  }
+  emit("zoom", (props.zoom ?? 1) + step);
 }
 
 function onClick() {
