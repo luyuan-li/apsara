@@ -1,27 +1,59 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import PetStage from "./components/PetStage.vue";
 import ChatPanel from "./components/ChatPanel.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
+import SkinStore from "./components/SkinStore.vue";
 import { mockChat } from "@apsara/mock-llm";
 import { invoke } from "@tauri-apps/api/core";
+import { findSkin, loadCatalog } from "./skins/catalog";
+import type { SkinItem } from "./types/skins";
 
 type Msg = { role: "user" | "assistant"; text: string };
-type Skin = "guofeng" | "live2d-mao";
 
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "双击角色打开/收起面板；滚轮缩放。再说一次也能丢文件进废纸篓。",
+    text: "双击角色打开面板；点「皮肤仓库」可选模型。滚轮缩放。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
 const busy = ref(false);
 const locked = ref(true);
-const skin = ref<Skin>("guofeng");
-/** Chrome (header + chat) hidden by default — desk-pet mode */
 const chromeOpen = ref(false);
+const storeOpen = ref(false);
 const zoom = ref(1);
+const skins = ref<SkinItem[]>([]);
+const skinId = ref("guofeng");
+
+const currentSkin = computed<SkinItem>(() => {
+  return (
+    findSkin(skins.value, skinId.value) ?? {
+      id: "guofeng",
+      name: "飞天",
+      kind: "image",
+      preview: "/pets/guofeng/apsara.png",
+      src: "/pets/guofeng/apsara.png",
+    }
+  );
+});
+
+onMounted(async () => {
+  const cat = await loadCatalog();
+  skins.value = cat.skins;
+  if (!findSkin(skins.value, skinId.value) && skins.value[0]) {
+    skinId.value = skins.value[0].id;
+  }
+  window.addEventListener("keydown", onKey);
+});
+onUnmounted(() => window.removeEventListener("keydown", onKey));
+
+function onKey(e: KeyboardEvent) {
+  if (e.key === "Escape") {
+    if (storeOpen.value) storeOpen.value = false;
+    else chromeOpen.value = false;
+  }
+}
 
 async function onSend(text: string) {
   if (!text.trim() || busy.value) return;
@@ -65,10 +97,6 @@ function onCancel() {
   pending.value = null;
 }
 
-function toggleSkin() {
-  skin.value = skin.value === "guofeng" ? "live2d-mao" : "guofeng";
-}
-
 function onPetActivate() {
   chromeOpen.value = !chromeOpen.value;
 }
@@ -77,28 +105,28 @@ function onZoom(next: number) {
   zoom.value = Math.min(2, Math.max(0.5, next));
 }
 
-function onKey(e: KeyboardEvent) {
-  if (e.key === "Escape") chromeOpen.value = false;
+function onSelectSkin(s: SkinItem) {
+  skinId.value = s.id;
+  storeOpen.value = false;
+  messages.value.push({
+    role: "assistant",
+    text: `已切换皮肤：${s.name}`,
+  });
 }
-
-onMounted(() => window.addEventListener("keydown", onKey));
-onUnmounted(() => window.removeEventListener("keydown", onKey));
 </script>
 
 <template>
-  <div class="shell" :class="{ locked, bare: !chromeOpen }">
+  <div class="shell" :class="{ locked, bare: !chromeOpen && !storeOpen }">
     <header v-show="chromeOpen" class="bar" data-tauri-drag-region>
       <div class="brand">
         <span class="mark" aria-hidden="true" />
         <div class="titles">
           <span class="title">Apsara</span>
-          <span class="sub">滚轮缩放 · Esc 收起</span>
+          <span class="sub">{{ currentSkin.name }} · 滚轮缩放</span>
         </div>
       </div>
       <div class="actions">
-        <button type="button" class="chip" @click="toggleSkin">
-          {{ skin === "guofeng" ? "古风皮" : "Live2D" }}
-        </button>
+        <button type="button" class="chip" @click="storeOpen = true">皮肤仓库</button>
         <button type="button" class="chip quiet" @click="locked = !locked">
           {{ locked ? "锁定" : "穿透" }}
         </button>
@@ -107,7 +135,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
     </header>
 
     <PetStage
-      :skin="skin"
+      :skin="currentSkin"
       :zoom="zoom"
       @activate="onPetActivate"
       @zoom="onZoom"
@@ -118,6 +146,13 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       :messages="messages"
       :disabled="busy"
       @send="onSend"
+    />
+
+    <SkinStore
+      v-if="storeOpen"
+      :current-id="skinId"
+      @select="onSelectSkin"
+      @close="storeOpen = false"
     />
 
     <ConfirmDialog
@@ -143,7 +178,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .shell.bare {
   padding: 0;
   gap: 0;
-  /* no chrome chrome → no panel lines around the pet */
 }
 .bar {
   display: flex;
@@ -188,6 +222,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   font-size: 11px;
   color: var(--ink-soft);
   opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 .actions {
   display: flex;

@@ -2,14 +2,12 @@
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { createGuofengStage } from "../renderer/guofengPet";
 import { createLive2dStage } from "../renderer/live2dPet";
+import type { SkinItem } from "../types/skins";
 
-const props = withDefaults(
-  defineProps<{
-    skin?: "guofeng" | "live2d-mao";
-    zoom?: number;
-  }>(),
-  { skin: "guofeng", zoom: 1 },
-);
+const props = defineProps<{
+  skin: SkinItem;
+  zoom?: number;
+}>();
 
 const emit = defineEmits<{
   activate: [];
@@ -17,7 +15,6 @@ const emit = defineEmits<{
 }>();
 
 const host = ref<HTMLDivElement | null>(null);
-const stage = ref<HTMLDivElement | null>(null);
 let dispose: (() => void) | null = null;
 
 async function mountSkin() {
@@ -25,25 +22,21 @@ async function mountSkin() {
   dispose = null;
   if (!host.value) return;
   host.value.innerHTML = "";
-  if (props.skin === "live2d-mao") {
-    dispose = await createLive2dStage(host.value, "/pets/live2d/mao/Mao.model3.json");
+  if (props.skin.kind === "live2d") {
+    dispose = await createLive2dStage(host.value, props.skin.src);
   } else {
-    dispose = await createGuofengStage(host.value, "/pets/guofeng/apsara.png");
+    dispose = await createGuofengStage(host.value, props.skin.src);
   }
 }
 
 function onWheel(e: WheelEvent) {
   e.preventDefault();
-  // Trackpads send many pixel deltas; dampen heavily so zoom feels gentle.
   let step: number;
   if (e.deltaMode === 1) {
-    // line mode (classic mouse wheel)
     step = e.deltaY > 0 ? -0.04 : 0.04;
   } else if (e.deltaMode === 2) {
-    // page mode
     step = e.deltaY > 0 ? -0.08 : 0.08;
   } else {
-    // pixel mode — typical Mac trackpad
     step = -e.deltaY * 0.0008;
     step = Math.max(-0.035, Math.min(0.035, step));
   }
@@ -55,7 +48,7 @@ function onClick() {
 }
 
 onMounted(mountSkin);
-watch(() => props.skin, mountSkin);
+watch(() => props.skin.id, mountSkin);
 onBeforeUnmount(() => {
   dispose?.();
   dispose = null;
@@ -64,7 +57,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    ref="stage"
     class="stage"
     data-tauri-drag-region
     @wheel.prevent="onWheel"
@@ -73,7 +65,7 @@ onBeforeUnmount(() => {
     <div
       ref="host"
       class="host"
-      :style="{ transform: `scale(${zoom})` }"
+      :style="{ transform: `scale(${zoom ?? 1})` }"
     />
   </div>
 </template>
@@ -85,7 +77,6 @@ onBeforeUnmount(() => {
   width: 100%;
   display: grid;
   place-items: center;
-  /* no border / outline — pet only */
   background: transparent;
   border: 0;
   outline: none;
@@ -111,7 +102,6 @@ onBeforeUnmount(() => {
   background: transparent;
   border: 0;
   outline: none;
-  /* soft shadow only, no hard outline */
   filter: drop-shadow(0 18px 28px rgba(60, 35, 20, 0.18));
 }
 </style>

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skins": [
+    {
+      "id": "guofeng",
+      "name": "飞天",
+      "kind": "image",
+      "preview": "/pets/guofeng/apsara.png",
+      "src": "/pets/guofeng/apsara.png",
+      "tags": ["古风", "默认"],
+      "blurb": "敦煌飞天风插画，默认皮肤"
+    },
+    {
+      "id": "live2d-mao",
+      "name": "Mao",
+      "kind": "live2d",
+      "preview": "/pets/live2d/mao/Mao.2048/texture_00.png",
+      "src": "/pets/live2d/mao/Mao.model3.json",
+      "tags": ["Live2D", "样例"],
+      "blurb": "Live2D 官方样例，用于验证管线（非古风）"
+    }
+  ]
+}
