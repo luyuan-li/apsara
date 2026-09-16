@@ -8,8 +8,8 @@
   --gold-deep: #a87b45;
   --azure: #7eb8d8;
   --blush: #e8b4c8;
-  --panel-border: rgba(168, 123, 69, 0.28);
-  --shadow: 0 10px 36px rgba(74, 50, 40, 0.14);
+  --panel-border: rgba(168, 123, 69, 0.22);
+  --shadow: 0 10px 36px rgba(74, 50, 40, 0.12);
   --radius: 16px;
   font-family: "PingFang SC", "SF Pro Text", "Hiragino Sans GB", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -19,13 +19,17 @@ html, body, #app {
   margin: 0;
   width: 100%;
   height: 100%;
-  background: transparent;
+  background: transparent !important;
   overflow: hidden;
   user-select: none;
   color: var(--ink);
+  border: 0;
+  outline: none;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 button, input {
   font: inherit;
@@ -36,4 +40,11 @@ button {
 }
 button:active:not(:disabled) {
   transform: scale(0.97);
+}
+
+/* Avoid focus rings drawing “lines” around the pet stage */
+.stage:focus,
+.host:focus,
+img.pet:focus {
+  outline: none;
 }
