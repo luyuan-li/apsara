@@ -107,10 +107,8 @@ pub fn run() {
         .setup(|app| {
             let show_i = MenuItem::with_id(app, "show", "显示窗口", true, None::<&str>)?;
             let hide_i = MenuItem::with_id(app, "hide", "隐藏窗口", true, None::<&str>)?;
-            let lock_i = MenuItem::with_id(app, "lock", "锁定（可点）", true, None::<&str>)?;
-            let pierce_i = MenuItem::with_id(app, "pierce", "穿透（点穿空白）", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "退出 Apsara", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&show_i, &hide_i, &lock_i, &pierce_i, &quit_i])?;
+            let menu = Menu::with_items(app, &[&show_i, &hide_i, &quit_i])?;
 
             let icon = app
                 .default_window_icon()
@@ -122,15 +120,15 @@ pub fn run() {
                 .menu(&menu)
                 .tooltip("Apsara")
                 .show_menu_on_left_click(true)
-                .on_menu_event(|app, event| match event.id.as_ref() {
+                on_menu_event(|app, event| match event.id.as_ref() {
                     "quit" => {
                         app.exit(0);
                     }
                     "show" => {
                         if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.set_ignore_cursor_events(false);
                             let _ = w.show();
                             let _ = w.set_focus();
-                            let _ = w.set_ignore_cursor_events(false);
                         }
                     }
                     "hide" => {
@@ -138,21 +136,13 @@ pub fn run() {
                             let _ = w.hide();
                         }
                     }
-                    "lock" => {
-                        if let Some(w) = app.get_webview_window("main") {
-                            let _ = w.set_ignore_cursor_events(false);
-                            let _ = w.show();
-                            let _ = w.set_focus();
-                        }
-                    }
-                    "pierce" => {
-                        if let Some(w) = app.get_webview_window("main") {
-                            let _ = w.set_ignore_cursor_events(true);
-                        }
-                    }
                     _ => {}
                 })
                 .build(app)?;
+
+            if let Some(w) = app.get_webview_window("main") {
+                let _ = w.set_ignore_cursor_events(false);
+            }
 
             Ok(())
         })

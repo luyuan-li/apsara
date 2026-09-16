@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import PetStage from "./components/PetStage.vue";
 import ChatPanel from "./components/ChatPanel.vue";
@@ -15,22 +15,11 @@ type Msg = { role: "user" | "assistant"; text: string };
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "双击角色打开面板；点「皮肤仓库」可选模型。滚轮缩放。",
+    text: "双击角色打开面板；点「皮肤仓库」可选模型。滚轮缩放。菜单栏图标可显示/隐藏/退出。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
 const busy = ref(false);
-const locked = ref(true);
-
-/** locked=true → receive clicks; locked=false → click-through (穿透) */
-async function applyClickThrough() {
-  try {
-    await getCurrentWindow().setIgnoreCursorEvents(!locked.value);
-  } catch (e) {
-    console.warn("setIgnoreCursorEvents failed", e);
-  }
-}
-
 const chromeOpen = ref(false);
 const storeOpen = ref(false);
 const zoom = ref(1);
@@ -71,19 +60,14 @@ async function refreshCatalog() {
 onMounted(async () => {
   await refreshCatalog();
   window.addEventListener("keydown", onKey);
-  await applyClickThrough();
-});
-
-watch(locked, () => {
-  void applyClickThrough();
-});
-
-// Opening UI must disable click-through so panels stay clickable
-watch([chromeOpen, storeOpen], ([chrome, store]) => {
-  if (chrome || store) {
-    locked.value = true;
+  // Ensure we never leave the window in full click-through (unrecoverable without tray)
+  try {
+    await getCurrentWindow().setIgnoreCursorEvents(false);
+  } catch {
+    /* ignore in browser preview */
   }
 });
+
 onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 function onKey(e: KeyboardEvent) {
@@ -164,7 +148,7 @@ function onSelectSkin(s: SkinItem) {
 </script>
 
 <template>
-  <div class="shell" :class="{ locked, bare: !chromeOpen && !storeOpen }">
+  <div class="shell" :class="{ bare: !chromeOpen && !storeOpen }">
     <header v-show="chromeOpen" class="bar" data-tauri-drag-region>
       <div class="brand">
         <span class="mark" aria-hidden="true" />
@@ -175,14 +159,6 @@ function onSelectSkin(s: SkinItem) {
       </div>
       <div class="actions">
         <button type="button" class="chip" @click="openStore">皮肤仓库</button>
-        <button
-          type="button"
-          class="chip quiet"
-          :title="locked ? '当前锁定：可点击。点此切换为穿透' : '当前穿透：空白处点穿。点此锁定'"
-          @click="locked = !locked"
-        >
-          {{ locked ? "穿透" : "锁定" }}
-        </button>
         <button type="button" class="chip quiet" @click="chromeOpen = false">收起</button>
       </div>
     </header>
