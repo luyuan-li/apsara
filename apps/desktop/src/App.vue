@@ -15,7 +15,7 @@ type Msg = { role: "user" | "assistant"; text: string };
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "双击角色打开面板；点「皮肤仓库」可选模型。滚轮缩放。菜单栏图标可显示/隐藏/退出。",
+    text: "移动鼠标看角色跟手；单击有反应；双击打开面板。空白处可拖窗口。菜单栏可显示/隐藏/退出。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
