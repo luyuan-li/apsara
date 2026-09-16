@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import PetStage from "./components/PetStage.vue";
 import ChatPanel from "./components/ChatPanel.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
@@ -14,12 +15,11 @@ type Msg = { role: "user" | "assistant"; text: string };
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "双击角色打开面板；点「皮肤仓库」可选模型。滚轮缩放。",
+    text: "移动鼠标看角色跟手；单击有反应；双击打开面板。空白处可拖窗口。菜单栏可显示/隐藏/退出。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
 const busy = ref(false);
-const locked = ref(true);
 const chromeOpen = ref(false);
 const storeOpen = ref(false);
 const zoom = ref(1);
@@ -60,7 +60,14 @@ async function refreshCatalog() {
 onMounted(async () => {
   await refreshCatalog();
   window.addEventListener("keydown", onKey);
+  // Ensure we never leave the window in full click-through (unrecoverable without tray)
+  try {
+    await getCurrentWindow().setIgnoreCursorEvents(false);
+  } catch {
+    /* ignore in browser preview */
+  }
 });
+
 onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 function onKey(e: KeyboardEvent) {
@@ -141,7 +148,7 @@ function onSelectSkin(s: SkinItem) {
 </script>
 
 <template>
-  <div class="shell" :class="{ locked, bare: !chromeOpen && !storeOpen }">
+  <div class="shell" :class="{ bare: !chromeOpen && !storeOpen }">
     <header v-show="chromeOpen" class="bar" data-tauri-drag-region>
       <div class="brand">
         <span class="mark" aria-hidden="true" />
@@ -152,9 +159,6 @@ function onSelectSkin(s: SkinItem) {
       </div>
       <div class="actions">
         <button type="button" class="chip" @click="openStore">皮肤仓库</button>
-        <button type="button" class="chip quiet" @click="locked = !locked">
-          {{ locked ? "锁定" : "穿透" }}
-        </button>
         <button type="button" class="chip quiet" @click="chromeOpen = false">收起</button>
       </div>
     </header>

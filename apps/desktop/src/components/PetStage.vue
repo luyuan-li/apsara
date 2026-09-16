@@ -27,7 +27,9 @@ async function mountSkin() {
   try {
     const next =
       props.skin.kind === "live2d"
-        ? await createLive2dStage(host.value, props.skin.src)
+        ? await createLive2dStage(host.value, props.skin.src, {
+            onActivate: () => emit("activate"),
+          })
         : await createGuofengStage(host.value, props.skin.src);
     if (gen !== mountGen) {
       next();
@@ -81,6 +83,7 @@ onBeforeUnmount(() => {
     <div
       ref="host"
       class="host"
+      :class="{ interactive: skin.kind === 'live2d' }"
       :style="{ transform: `scale(${zoom ?? 1})` }"
     />
   </div>
@@ -96,7 +99,7 @@ onBeforeUnmount(() => {
   background: transparent;
   border: 0;
   outline: none;
-  cursor: pointer;
+  cursor: grab;
 }
 .host {
   width: min(300px, 88%);
@@ -108,8 +111,13 @@ onBeforeUnmount(() => {
   border: 0;
   outline: none;
   box-shadow: none;
-  /* Let hits fall through to .stage's data-tauri-drag-region so drag works on the pet */
+  /* Image skins: let drag region receive events on the pet */
   pointer-events: none;
+}
+.host.interactive {
+  /* Live2D: canvas receives mouse for focus / tap */
+  pointer-events: auto;
+  cursor: pointer;
 }
 .host :deep(img.pet) {
   width: 100%;
@@ -124,14 +132,15 @@ onBeforeUnmount(() => {
 }
 .host :deep(canvas) {
   display: block;
-  /* Let PIXI own canvas buffer/CSS size; only clamp overflow */
   max-width: 100%;
   max-height: 100%;
   background: transparent;
   border: 0;
   outline: none;
   filter: drop-shadow(0 18px 28px rgba(60, 35, 20, 0.18));
-  pointer-events: none;
+}
+.host.interactive :deep(canvas) {
+  pointer-events: auto;
 }
 .skin-error {
   color: #a87b45;
