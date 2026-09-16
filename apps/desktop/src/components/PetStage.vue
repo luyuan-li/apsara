@@ -92,6 +92,8 @@ onBeforeUnmount(() => {
   border: 0;
   outline: none;
   box-shadow: none;
+  /* Let hits fall through to .stage's data-tauri-drag-region so drag works on the pet */
+  pointer-events: none;
 }
 .host :deep(canvas),
 .host :deep(img.pet) {
@@ -103,5 +105,6 @@ onBeforeUnmount(() => {
   border: 0;
   outline: none;
   filter: drop-shadow(0 18px 28px rgba(60, 35, 20, 0.18));
+  pointer-events: none;
 }
 </style>
