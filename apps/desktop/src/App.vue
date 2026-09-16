@@ -24,16 +24,16 @@ const chromeOpen = ref(false);
 const storeOpen = ref(false);
 const zoom = ref(1);
 const skins = ref<SkinItem[]>([]);
-const skinId = ref("guofeng");
+const skinId = ref("live2d-mao");
 /** Always prefer the skin object picked from the store (catalog may refresh). */
 const activeSkin = ref<SkinItem | null>(null);
 
 const fallbackSkin: SkinItem = {
-  id: "guofeng",
-  name: "飞天",
-  kind: "image",
-  preview: "/pets/guofeng/apsara.png",
-  src: "/pets/guofeng/apsara.png",
+  id: "live2d-mao",
+  name: "Mao",
+  kind: "live2d",
+  preview: "/pets/live2d/mao/Mao.2048/texture_00.png",
+  src: "/pets/live2d/mao/Mao.model3.json",
 };
 
 const currentSkin = computed<SkinItem>(() => {

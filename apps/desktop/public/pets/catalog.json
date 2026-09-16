@@ -2,19 +2,6 @@
   "version": 1,
   "skins": [
     {
-      "id": "guofeng",
-      "name": "飞天",
-      "kind": "image",
-      "preview": "/pets/guofeng/apsara.png",
-      "src": "/pets/guofeng/apsara.png",
-      "tags": [
-        "古风",
-        "插画",
-        "默认"
-      ],
-      "blurb": "敦煌飞天风插画（静态），默认皮肤"
-    },
-    {
       "id": "live2d-mao",
       "name": "Mao",
       "kind": "live2d",
@@ -25,19 +12,6 @@
         "样例"
       ],
       "blurb": "Live2D 官方样例 · 动态"
-    },
-    {
-      "id": "live2d-wanko",
-      "name": "Wanko",
-      "kind": "live2d",
-      "preview": "/pets/live2d/wanko/Wanko.1024/texture_00.png",
-      "src": "/pets/live2d/wanko/Wanko.model3.json",
-      "tags": [
-        "Live2D",
-        "样例",
-        "小狗"
-      ],
-      "blurb": "Live2D 官方小狗样例 · 动态"
     },
     {
       "id": "live2d-hiyori",

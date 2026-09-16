@@ -3,7 +3,7 @@
 # License: Live2D Free Material License (NOT MIT) — see Live2D Cubism Sample Data terms.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-MODELS=("Mao" "Hiyori" "Haru" "Rice" "Wanko")
+MODELS=("Mao" "Hiyori" "Haru" "Rice")
 DEST_BASE="$ROOT/apps/desktop/public/pets/live2d"
 ASSETS_BASE="$ROOT/assets/pets/live2d"
 mkdir -p "$DEST_BASE" "$ASSETS_BASE"
