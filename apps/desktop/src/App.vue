@@ -15,7 +15,7 @@ type Msg = { role: "user" | "assistant"; text: string };
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "移动鼠标看角色跟手；单击有反应；双击打开面板。空白处可拖窗口。菜单栏可显示/隐藏/退出。",
+    text: "跟手注视；点头/点身不同反馈；可拖拽晃动；会随机待机。右键菜单。双击开面板。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
@@ -123,6 +123,18 @@ function onPetActivate() {
   chromeOpen.value = !chromeOpen.value;
 }
 
+async function onHideWindow() {
+  try {
+    await getCurrentWindow().hide();
+  } catch (e) {
+    console.warn("hide failed", e);
+  }
+}
+
+function onOpenStoreFromPet() {
+  void openStore();
+}
+
 function onZoom(next: number) {
   zoom.value = Math.min(2, Math.max(0.5, next));
 }
@@ -168,6 +180,8 @@ function onSelectSkin(s: SkinItem) {
       :zoom="zoom"
       @activate="onPetActivate"
       @zoom="onZoom"
+      @open-store="onOpenStoreFromPet"
+      @hide-window="onHideWindow"
     />
 
     <ChatPanel

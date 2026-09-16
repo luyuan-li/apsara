@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { createGuofengStage } from "../renderer/guofengPet";
 import { createLive2dStage } from "../renderer/live2dPet";
+import PetContextMenu from "./PetContextMenu.vue";
 import type { SkinItem } from "../types/skins";
 
 const props = defineProps<{
@@ -12,30 +13,46 @@ const props = defineProps<{
 const emit = defineEmits<{
   activate: [];
   zoom: [number];
+  openStore: [];
+  hideWindow: [];
 }>();
 
 const host = ref<HTMLDivElement | null>(null);
 let dispose: (() => void) | null = null;
+let randomExpression: (() => Promise<void>) | null = null;
 let mountGen = 0;
+
+const menu = ref<{ x: number; y: number } | null>(null);
 
 async function mountSkin() {
   const gen = ++mountGen;
   dispose?.();
   dispose = null;
+  randomExpression = null;
   if (!host.value) return;
   host.value.replaceChildren();
   try {
-    const next =
-      props.skin.kind === "live2d"
-        ? await createLive2dStage(host.value, props.skin.src, {
-            onActivate: () => emit("activate"),
-          })
-        : await createGuofengStage(host.value, props.skin.src);
-    if (gen !== mountGen) {
-      next();
-      return;
+    if (props.skin.kind === "live2d") {
+      const ctrl = await createLive2dStage(host.value, props.skin.src, {
+        onActivate: () => emit("activate"),
+        onContextMenu: (pos) => {
+          menu.value = pos;
+        },
+      });
+      if (gen !== mountGen) {
+        ctrl.dispose();
+        return;
+      }
+      dispose = ctrl.dispose;
+      randomExpression = ctrl.randomExpression;
+    } else {
+      const next = await createGuofengStage(host.value, props.skin.src);
+      if (gen !== mountGen) {
+        next();
+        return;
+      }
+      dispose = next;
     }
-    dispose = next;
   } catch (e) {
     console.error("[PetStage] failed to mount skin", props.skin.id, props.skin.src, e);
     if (gen === mountGen && host.value) {
@@ -65,11 +82,17 @@ function onClick() {
   emit("activate");
 }
 
+async function onRandomExpression() {
+  menu.value = null;
+  await randomExpression?.();
+}
+
 onMounted(mountSkin);
 watch(() => [props.skin.id, props.skin.src, props.skin.kind], mountSkin);
 onBeforeUnmount(() => {
   dispose?.();
   dispose = null;
+  randomExpression = null;
 });
 </script>
 
@@ -87,6 +110,17 @@ onBeforeUnmount(() => {
       :style="{ transform: `scale(${zoom ?? 1})` }"
     />
   </div>
+
+  <PetContextMenu
+    v-if="menu"
+    :x="menu.x"
+    :y="menu.y"
+    @close="menu = null"
+    @open-panel="menu = null; emit('activate')"
+    @open-store="menu = null; emit('openStore')"
+    @random-expression="onRandomExpression"
+    @hide-window="menu = null; emit('hideWindow')"
+  />
 </template>
 
 <style scoped>
@@ -111,11 +145,9 @@ onBeforeUnmount(() => {
   border: 0;
   outline: none;
   box-shadow: none;
-  /* Image skins: let drag region receive events on the pet */
   pointer-events: none;
 }
 .host.interactive {
-  /* Live2D: canvas receives mouse for focus / tap */
   pointer-events: auto;
   cursor: pointer;
 }
