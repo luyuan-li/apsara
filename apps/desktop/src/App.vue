@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import PetStage from "./components/PetStage.vue";
 import ChatPanel from "./components/ChatPanel.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
@@ -12,13 +12,16 @@ type Skin = "guofeng" | "live2d-mao";
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "你好，我是 Apsara。默认古风飞天皮；需要时可切到 Live2D 样例验证管线。",
+    text: "双击角色打开/收起面板；滚轮缩放。再说一次也能丢文件进废纸篓。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
 const busy = ref(false);
 const locked = ref(true);
 const skin = ref<Skin>("guofeng");
+/** Chrome (header + chat) hidden by default — desk-pet mode */
+const chromeOpen = ref(false);
+const zoom = ref(1);
 
 async function onSend(text: string) {
   if (!text.trim() || busy.value) return;
@@ -29,6 +32,7 @@ async function onSend(text: string) {
     messages.value.push({ role: "assistant", text: res.text });
     if (res.kind === "tool" && res.name === "trash_path") {
       pending.value = { path: res.path };
+      chromeOpen.value = true;
     }
   } finally {
     busy.value = false;
@@ -64,17 +68,31 @@ function onCancel() {
 function toggleSkin() {
   skin.value = skin.value === "guofeng" ? "live2d-mao" : "guofeng";
 }
+
+function onPetActivate() {
+  chromeOpen.value = !chromeOpen.value;
+}
+
+function onZoom(next: number) {
+  zoom.value = Math.min(2, Math.max(0.5, next));
+}
+
+function onKey(e: KeyboardEvent) {
+  if (e.key === "Escape") chromeOpen.value = false;
+}
+
+onMounted(() => window.addEventListener("keydown", onKey));
+onUnmounted(() => window.removeEventListener("keydown", onKey));
 </script>
 
 <template>
-  <div class="shell" :class="{ locked }">
-    <div class="glow" aria-hidden="true" />
-    <header class="bar" data-tauri-drag-region>
+  <div class="shell" :class="{ locked, bare: !chromeOpen }">
+    <header v-show="chromeOpen" class="bar" data-tauri-drag-region>
       <div class="brand">
         <span class="mark" aria-hidden="true" />
         <div class="titles">
           <span class="title">Apsara</span>
-          <span class="sub">飞天 · desk pet</span>
+          <span class="sub">滚轮缩放 · Esc 收起</span>
         </div>
       </div>
       <div class="actions">
@@ -84,12 +102,23 @@ function toggleSkin() {
         <button type="button" class="chip quiet" @click="locked = !locked">
           {{ locked ? "锁定" : "穿透" }}
         </button>
+        <button type="button" class="chip quiet" @click="chromeOpen = false">收起</button>
       </div>
     </header>
 
-    <PetStage :skin="skin" />
+    <PetStage
+      :skin="skin"
+      :zoom="zoom"
+      @activate="onPetActivate"
+      @zoom="onZoom"
+    />
 
-    <ChatPanel :messages="messages" :disabled="busy" @send="onSend" />
+    <ChatPanel
+      v-show="chromeOpen"
+      :messages="messages"
+      :disabled="busy"
+      @send="onSend"
+    />
 
     <ConfirmDialog
       v-if="pending"
@@ -111,16 +140,10 @@ function toggleSkin() {
   gap: 10px;
   isolation: isolate;
 }
-.glow {
-  pointer-events: none;
-  position: absolute;
-  inset: 8% 10% auto;
-  height: 42%;
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(126, 184, 216, 0.28), transparent 60%),
-    radial-gradient(ellipse at 70% 60%, rgba(232, 180, 200, 0.22), transparent 55%);
-  filter: blur(2px);
-  z-index: -1;
+.shell.bare {
+  padding: 0;
+  gap: 0;
+  /* no chrome chrome → no panel lines around the pet */
 }
 .bar {
   display: flex;
@@ -186,8 +209,5 @@ function toggleSkin() {
   background: rgba(255, 255, 255, 0.55);
   border-color: rgba(168, 123, 69, 0.22);
   font-weight: 500;
-}
-.chip:hover {
-  filter: brightness(1.03);
 }
 </style>
