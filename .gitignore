@@ -15,3 +15,7 @@ src-tauri/target/
 !.vscode/extensions.json
 .pnpm-store/
 coverage/
+
+# Live2D Free Material samples (fetch via scripts/fetch-live2d-samples.sh)
+apps/desktop/public/pets/live2d/
+assets/pets/live2d/
