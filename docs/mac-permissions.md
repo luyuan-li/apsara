@@ -16,3 +16,12 @@
 
 ## Later (not MVP)
 - Accessibility / UI automation permissions only if you add input injection plugins
+
+## MVP permission matrix
+| Capability | Needed in MVP? |
+|------------|----------------|
+| Files in allowlisted folders | Yes (user-granted implicitly by choosing paths) |
+| Trash | Yes (system trash APIs) |
+| Accessibility (UI automation) | No |
+| Screen Recording | No |
+| Microphone | No (until ASR) |

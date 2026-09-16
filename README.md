@@ -4,6 +4,10 @@
 
 **Status:** early open-source scaffold (architecture + empty modules). Not a runnable pet yet.
 
+## Current status
+Design docs are in `docs/` (`product-mvp`, `ux-flows`, `security`, architecture, tools).  
+App modules are scaffolded; wiring Vite + `tauri dev` is the next implementation milestone.
+
 ## Why Apsara
 Apsara (飞天) aims to be a macOS desktop pet you can chat with. The agent may call tools such as moving a file to **Trash** — always with confirmation, never silent `rm`.
 
@@ -27,6 +31,9 @@ docs/             Architecture & protocols
 ## Docs
 - [Architecture & directory design](docs/architecture.md)（中文）
 - [Tool protocol](docs/tool-protocol.md)
+- [MVP product & acceptance](docs/product-mvp.md)
+- [UX flows](docs/ux-flows.md)
+- [Security model](docs/security.md)
 - [macOS notes](docs/mac-permissions.md)
 
 ## Development (soon)

@@ -260,3 +260,21 @@ interface ToolDef {
 - 工具协议与目录一旦定下，Agent 与壳可以并行开干  
 
 若要下一步，我可以把这份文件落到你 Mac 的指定目录，或按此目录直接生成空项目骨架（仍不装 NyaDeskPet）。
+
+---
+
+## 10. 运行时与模块边界（补充）
+
+### 进程
+- 单进程 Tauri：WebView（Vue）+ Rust 壳
+- Agent 跑在 WebView（TS）；所有 FS 经 `invoke`
+
+### 状态
+- `session`：消息列表、pending tool confirmation
+- `settings`：模型端点、穿透开关、缩放、白名单（MVP 可只读默认）
+
+### 事件
+- `tool:confirm-required` → UI
+- `tool:confirmed` / `tool:cancelled` → Agent 继续
+
+详见 `product-mvp.md`、`ux-flows.md`、`security.md`。
