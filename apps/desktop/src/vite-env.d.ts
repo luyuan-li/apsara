@@ -4,3 +4,6 @@ declare module "*.vue" {
   const component: DefineComponent<object, object, unknown>;
   export default component;
 }
+declare module "pixi-live2d-display/cubism4" {
+  export const Live2DModel: any;
+}

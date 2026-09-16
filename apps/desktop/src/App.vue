@@ -7,13 +7,18 @@ import { mockChat } from "@apsara/mock-llm";
 import { invoke } from "@tauri-apps/api/core";
 
 type Msg = { role: "user" | "assistant"; text: string };
+type Skin = "guofeng" | "live2d-mao";
 
 const messages = ref<Msg[]>([
-  { role: "assistant", text: "你好，我是 Apsara（飞天）。先聊几句，或让我把测试文件送进废纸篓。" },
+  {
+    role: "assistant",
+    text: "你好，我是 Apsara（飞天）。默认是古风皮；右上角可切到 Live2D 样例（Mao，非古风，仅验证管线）。",
+  },
 ]);
-const pending = ref<{ path: string; absolute?: string } | null>(null);
+const pending = ref<{ path: string } | null>(null);
 const busy = ref(false);
 const locked = ref(true);
+const skin = ref<Skin>("guofeng");
 
 async function onSend(text: string) {
   if (!text.trim() || busy.value) return;
@@ -55,17 +60,26 @@ function onCancel() {
   messages.value.push({ role: "assistant", text: "好，已取消。" });
   pending.value = null;
 }
+
+function toggleSkin() {
+  skin.value = skin.value === "guofeng" ? "live2d-mao" : "guofeng";
+}
 </script>
 
 <template>
   <div class="shell" :class="{ locked }">
     <header class="bar" data-tauri-drag-region>
       <span class="title">Apsara</span>
-      <button type="button" class="chip" @click="locked = !locked">
-        {{ locked ? "已锁定" : "穿透中" }}
-      </button>
+      <div class="actions">
+        <button type="button" class="chip" @click="toggleSkin">
+          {{ skin === "guofeng" ? "古风皮" : "Live2D·Mao" }}
+        </button>
+        <button type="button" class="chip" @click="locked = !locked">
+          {{ locked ? "已锁定" : "穿透中" }}
+        </button>
+      </div>
     </header>
-    <PetStage />
+    <PetStage :skin="skin" />
     <ChatPanel :messages="messages" :disabled="busy" @send="onSend" />
     <ConfirmDialog
       v-if="pending"
@@ -84,6 +98,7 @@ function onCancel() {
   flex-direction: column;
   padding: 10px;
   gap: 8px;
+  position: relative;
 }
 .bar {
   display: flex;
@@ -100,6 +115,7 @@ function onCancel() {
   color: #6b3f2a;
   letter-spacing: 0.04em;
 }
+.actions { display: flex; gap: 6px; }
 .chip {
   border: 0;
   border-radius: 999px;

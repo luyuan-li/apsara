@@ -16,7 +16,9 @@
     "@apsara/shared": "workspace:*",
     "@tauri-apps/api": "^2.2.0",
     "@tauri-apps/plugin-shell": "^2.2.0",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "pixi.js": "^7.4.2",
+    "pixi-live2d-display": "0.5.0-beta"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.2.0",
