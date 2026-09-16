@@ -12,7 +12,7 @@ type Skin = "guofeng" | "live2d-mao";
 const messages = ref<Msg[]>([
   {
     role: "assistant",
-    text: "你好，我是 Apsara（飞天）。默认是古风皮；右上角可切到 Live2D 样例（Mao，非古风，仅验证管线）。",
+    text: "你好，我是 Apsara。默认古风飞天皮；需要时可切到 Live2D 样例验证管线。",
   },
 ]);
 const pending = ref<{ path: string } | null>(null);
@@ -68,19 +68,29 @@ function toggleSkin() {
 
 <template>
   <div class="shell" :class="{ locked }">
+    <div class="glow" aria-hidden="true" />
     <header class="bar" data-tauri-drag-region>
-      <span class="title">Apsara</span>
+      <div class="brand">
+        <span class="mark" aria-hidden="true" />
+        <div class="titles">
+          <span class="title">Apsara</span>
+          <span class="sub">飞天 · desk pet</span>
+        </div>
+      </div>
       <div class="actions">
         <button type="button" class="chip" @click="toggleSkin">
-          {{ skin === "guofeng" ? "古风皮" : "Live2D·Mao" }}
+          {{ skin === "guofeng" ? "古风皮" : "Live2D" }}
         </button>
-        <button type="button" class="chip" @click="locked = !locked">
-          {{ locked ? "已锁定" : "穿透中" }}
+        <button type="button" class="chip quiet" @click="locked = !locked">
+          {{ locked ? "锁定" : "穿透" }}
         </button>
       </div>
     </header>
+
     <PetStage :skin="skin" />
+
     <ChatPanel :messages="messages" :disabled="busy" @send="onSend" />
+
     <ConfirmDialog
       v-if="pending"
       title="确认丢进废纸篓？"
@@ -93,35 +103,91 @@ function toggleSkin() {
 
 <style scoped>
 .shell {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  gap: 8px;
-  position: relative;
+  padding: 12px;
+  gap: 10px;
+  isolation: isolate;
+}
+.glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 8% 10% auto;
+  height: 42%;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(126, 184, 216, 0.28), transparent 60%),
+    radial-gradient(ellipse at 70% 60%, rgba(232, 180, 200, 0.22), transparent 55%);
+  filter: blur(2px);
+  z-index: -1;
 }
 .bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
-  border-radius: 12px;
-  background: rgba(255, 248, 240, 0.92);
-  border: 1px solid rgba(180, 120, 80, 0.25);
-  box-shadow: 0 4px 20px rgba(80, 40, 20, 0.08);
+  gap: 10px;
+  padding: 8px 10px 8px 12px;
+  border-radius: 14px;
+  background: var(--cream-glass);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: var(--shadow);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--azure), var(--blush), var(--gold));
+  box-shadow: 0 0 0 3px rgba(201, 160, 106, 0.18);
+  flex: none;
+}
+.titles {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-width: 0;
 }
 .title {
-  font-weight: 600;
-  color: #6b3f2a;
+  font-weight: 650;
   letter-spacing: 0.04em;
+  color: var(--ink);
+  font-size: 14px;
 }
-.actions { display: flex; gap: 6px; }
+.sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+.actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
 .chip {
-  border: 0;
+  border: 1px solid rgba(168, 123, 69, 0.35);
   border-radius: 999px;
-  padding: 4px 10px;
-  background: #f0d2b0;
-  color: #5a321f;
+  padding: 5px 11px;
+  background: linear-gradient(180deg, #f6e4cc, #e8c9a0);
+  color: var(--ink);
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 550;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.chip.quiet {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(168, 123, 69, 0.22);
+  font-weight: 500;
+}
+.chip:hover {
+  filter: brightness(1.03);
 }
 </style>
