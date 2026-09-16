@@ -67,7 +67,12 @@ function pick(s: SkinItem) {
           @click="pick(s)"
         >
           <div class="thumb-wrap">
-            <img class="thumb" :src="s.preview" :alt="s.name" />
+            <img
+              class="thumb"
+              :src="s.preview"
+              :alt="s.name"
+              @error="($event.target as HTMLImageElement).style.opacity='0.25'"
+            />
           </div>
           <div class="meta">
             <div class="row">

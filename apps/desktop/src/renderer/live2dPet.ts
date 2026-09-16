@@ -10,7 +10,6 @@ function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
     if (existing) {
-      // Script tag exists — wait until Cubism core is actually on window
       if (window.Live2DCubismCore) {
         resolve();
         return;
@@ -42,6 +41,9 @@ export async function createLive2dStage(
   modelUrl: string,
 ): Promise<() => void> {
   await loadScript("/live2d-core/live2dcubismcore.min.js");
+  if (!window.Live2DCubismCore) {
+    throw new Error("Live2D Cubism core missing after script load");
+  }
   const { Live2DModel } = await import("pixi-live2d-display/cubism4");
 
   // @ts-expect-error pixi ticker registration used by the plugin
@@ -57,15 +59,29 @@ export async function createLive2dStage(
   host.appendChild(app.view as HTMLCanvasElement);
 
   const url = absoluteUrl(modelUrl);
-  const model = await Live2DModel.from(url);
+  const model = await Live2DModel.from(url, {
+    // Avoid autofetching optional sound banks some samples reference
+    autoInteract: false,
+  } as object);
+
   const bw = Math.max(model.width || 1, 1);
   const bh = Math.max(model.height || 1, 1);
-  const scale = Math.min(host.clientWidth / bw, host.clientHeight / bh) * 0.95;
-  model.scale.set(Number.isFinite(scale) && scale > 0 ? scale : 0.5);
+  const pad = 0.88;
+  const scale = Math.min(host.clientWidth / bw, host.clientHeight / bh) * pad;
+  model.scale.set(Number.isFinite(scale) && scale > 0 ? scale : 0.4);
+  // Center — works for standing characters and small pets like Wanko
+  model.anchor.set(0.5, 0.5);
   model.x = host.clientWidth / 2;
-  model.y = host.clientHeight * 0.92;
-  model.anchor.set(0.5, 1);
+  model.y = host.clientHeight / 2;
   app.stage.addChild(model);
+
+  // Kick idle if available (some models stay T-pose otherwise)
+  try {
+    // @ts-expect-error motion API
+    model.motion?.("Idle");
+  } catch {
+    /* optional */
+  }
 
   return () => {
     try {
