@@ -1,7 +1,20 @@
 :root {
   color-scheme: light;
-  font-family: "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+  --ink: #4a3228;
+  --ink-soft: #6b4a3a;
+  --cream: #fff8f0;
+  --cream-glass: rgba(255, 248, 240, 0.78);
+  --gold: #c9a06a;
+  --gold-deep: #a87b45;
+  --azure: #7eb8d8;
+  --blush: #e8b4c8;
+  --panel-border: rgba(168, 123, 69, 0.28);
+  --shadow: 0 10px 36px rgba(74, 50, 40, 0.14);
+  --radius: 16px;
+  font-family: "PingFang SC", "SF Pro Text", "Hiragino Sans GB", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
 html, body, #app {
   margin: 0;
   width: 100%;
@@ -9,6 +22,18 @@ html, body, #app {
   background: transparent;
   overflow: hidden;
   user-select: none;
+  color: var(--ink);
 }
+
 * { box-sizing: border-box; }
-button, input { font: inherit; }
+
+button, input {
+  font: inherit;
+}
+
+button {
+  transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
