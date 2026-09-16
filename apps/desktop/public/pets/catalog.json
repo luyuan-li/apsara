@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skins": [
+    {
+      "id": "live2d-mao",
+      "name": "Mao",
+      "kind": "live2d",
+      "preview": "/pets/live2d/mao/Mao.2048/texture_00.png",
+      "src": "/pets/live2d/mao/Mao.model3.json",
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
+      "blurb": "Live2D 官方样例 · 动态"
+    },
+    {
+      "id": "live2d-hiyori",
+      "name": "Hiyori",
+      "kind": "live2d",
+      "preview": "/pets/live2d/hiyori/Hiyori.2048/texture_00.png",
+      "src": "/pets/live2d/hiyori/Hiyori.model3.json",
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
+      "blurb": "Live2D 官方样例 · 动态"
+    },
+    {
+      "id": "live2d-haru",
+      "name": "Haru",
+      "kind": "live2d",
+      "preview": "/pets/live2d/haru/Haru.2048/texture_00.png",
+      "src": "/pets/live2d/haru/Haru.model3.json",
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
+      "blurb": "Live2D 官方样例 · 动态"
+    },
+    {
+      "id": "live2d-rice",
+      "name": "Rice",
+      "kind": "live2d",
+      "preview": "/pets/live2d/rice/Rice.2048/texture_00.png",
+      "src": "/pets/live2d/rice/Rice.model3.json",
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
+      "blurb": "Live2D 官方样例 · 动态"
+    }
+  ]
+}

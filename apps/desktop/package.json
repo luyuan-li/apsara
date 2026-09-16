@@ -4,11 +4,27 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "echo \"TODO: wire Vite + tauri dev — see docs/architecture.md\"",
-    "build": "echo \"TODO: wire Vite + tauri build\""
+    "dev": "vite",
+    "build": "vue-tsc -b --pretty false && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@apsara/mock-llm": "workspace:*",
     "@apsara/shared": "workspace:*",
-    "@apsara/mock-llm": "workspace:*"
+    "@tauri-apps/api": "^2.2.0",
+    "@tauri-apps/plugin-shell": "^2.2.0",
+    "vue": "^3.5.13",
+    "pixi.js": "^7.4.2",
+    "pixi-live2d-display": "0.5.0-beta"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.2.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.7",
+    "vue-tsc": "^2.2.0"
   }
 }
