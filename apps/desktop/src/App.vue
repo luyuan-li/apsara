@@ -25,25 +25,40 @@ const storeOpen = ref(false);
 const zoom = ref(1);
 const skins = ref<SkinItem[]>([]);
 const skinId = ref("guofeng");
+/** Always prefer the skin object picked from the store (catalog may refresh). */
+const activeSkin = ref<SkinItem | null>(null);
+
+const fallbackSkin: SkinItem = {
+  id: "guofeng",
+  name: "飞天",
+  kind: "image",
+  preview: "/pets/guofeng/apsara.png",
+  src: "/pets/guofeng/apsara.png",
+};
 
 const currentSkin = computed<SkinItem>(() => {
-  return (
-    findSkin(skins.value, skinId.value) ?? {
-      id: "guofeng",
-      name: "飞天",
-      kind: "image",
-      preview: "/pets/guofeng/apsara.png",
-      src: "/pets/guofeng/apsara.png",
-    }
-  );
+  if (activeSkin.value && activeSkin.value.id === skinId.value) {
+    return activeSkin.value;
+  }
+  return findSkin(skins.value, skinId.value) ?? activeSkin.value ?? fallbackSkin;
 });
 
-onMounted(async () => {
+async function refreshCatalog() {
   const cat = await loadCatalog();
   skins.value = cat.skins;
-  if (!findSkin(skins.value, skinId.value) && skins.value[0]) {
+  if (activeSkin.value) {
+    const fresh = findSkin(skins.value, activeSkin.value.id);
+    if (fresh) activeSkin.value = fresh;
+  } else if (!findSkin(skins.value, skinId.value) && skins.value[0]) {
     skinId.value = skins.value[0].id;
+    activeSkin.value = skins.value[0];
+  } else {
+    activeSkin.value = findSkin(skins.value, skinId.value) ?? skins.value[0] ?? fallbackSkin;
   }
+}
+
+onMounted(async () => {
+  await refreshCatalog();
   window.addEventListener("keydown", onKey);
 });
 onUnmounted(() => window.removeEventListener("keydown", onKey));
@@ -105,7 +120,17 @@ function onZoom(next: number) {
   zoom.value = Math.min(2, Math.max(0.5, next));
 }
 
+async function openStore() {
+  storeOpen.value = true;
+  await refreshCatalog();
+}
+
 function onSelectSkin(s: SkinItem) {
+  // Use the emitted item directly — don't rely on a possibly stale skins[] list.
+  if (!findSkin(skins.value, s.id)) {
+    skins.value = [...skins.value, s];
+  }
+  activeSkin.value = s;
   skinId.value = s.id;
   storeOpen.value = false;
   messages.value.push({
@@ -126,7 +151,7 @@ function onSelectSkin(s: SkinItem) {
         </div>
       </div>
       <div class="actions">
-        <button type="button" class="chip" @click="storeOpen = true">皮肤仓库</button>
+        <button type="button" class="chip" @click="openStore">皮肤仓库</button>
         <button type="button" class="chip quiet" @click="locked = !locked">
           {{ locked ? "锁定" : "穿透" }}
         </button>

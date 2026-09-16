@@ -8,9 +8,15 @@ declare global {
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${src}"]`);
+    const existing = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
     if (existing) {
-      resolve();
+      // Script tag exists — wait until Cubism core is actually on window
+      if (window.Live2DCubismCore) {
+        resolve();
+        return;
+      }
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error(`failed to load ${src}`)));
       return;
     }
     const s = document.createElement("script");
@@ -20,6 +26,14 @@ function loadScript(src: string): Promise<void> {
     s.onerror = () => reject(new Error(`failed to load ${src}`));
     document.head.appendChild(s);
   });
+}
+
+function absoluteUrl(path: string): string {
+  try {
+    return new URL(path, window.location.href).href;
+  } catch {
+    return path;
+  }
 }
 
 /** Cubism 4 Live2D stage via pixi-live2d-display. */
@@ -42,22 +56,28 @@ export async function createLive2dStage(
   });
   host.appendChild(app.view as HTMLCanvasElement);
 
-  const model = await Live2DModel.from(modelUrl);
-  const scale = Math.min(host.clientWidth / model.width, host.clientHeight / model.height) * 0.95;
-  model.scale.set(scale);
+  const url = absoluteUrl(modelUrl);
+  const model = await Live2DModel.from(url);
+  const bw = Math.max(model.width || 1, 1);
+  const bh = Math.max(model.height || 1, 1);
+  const scale = Math.min(host.clientWidth / bw, host.clientHeight / bh) * 0.95;
+  model.scale.set(Number.isFinite(scale) && scale > 0 ? scale : 0.5);
   model.x = host.clientWidth / 2;
   model.y = host.clientHeight * 0.92;
   model.anchor.set(0.5, 1);
   app.stage.addChild(model);
 
-  const onTick = () => {
-    // idle motion handled by model internals when available
-  };
-  app.ticker.add(onTick);
-
   return () => {
-    app.ticker.remove(onTick);
-    model.destroy();
-    app.destroy(true, { children: true });
+    try {
+      app.stage.removeChild(model);
+      model.destroy();
+    } catch {
+      /* ignore */
+    }
+    try {
+      app.destroy(true, { children: true });
+    } catch {
+      /* ignore */
+    }
   };
 }

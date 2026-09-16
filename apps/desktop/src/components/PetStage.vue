@@ -16,16 +16,32 @@ const emit = defineEmits<{
 
 const host = ref<HTMLDivElement | null>(null);
 let dispose: (() => void) | null = null;
+let mountGen = 0;
 
 async function mountSkin() {
+  const gen = ++mountGen;
   dispose?.();
   dispose = null;
   if (!host.value) return;
-  host.value.innerHTML = "";
-  if (props.skin.kind === "live2d") {
-    dispose = await createLive2dStage(host.value, props.skin.src);
-  } else {
-    dispose = await createGuofengStage(host.value, props.skin.src);
+  host.value.replaceChildren();
+  try {
+    const next =
+      props.skin.kind === "live2d"
+        ? await createLive2dStage(host.value, props.skin.src)
+        : await createGuofengStage(host.value, props.skin.src);
+    if (gen !== mountGen) {
+      next();
+      return;
+    }
+    dispose = next;
+  } catch (e) {
+    console.error("[PetStage] failed to mount skin", props.skin.id, props.skin.src, e);
+    if (gen === mountGen && host.value) {
+      const err = document.createElement("div");
+      err.className = "skin-error";
+      err.textContent = `皮肤加载失败：${props.skin.name}`;
+      host.value.appendChild(err);
+    }
   }
 }
 
@@ -48,7 +64,7 @@ function onClick() {
 }
 
 onMounted(mountSkin);
-watch(() => props.skin.id, mountSkin);
+watch(() => [props.skin.id, props.skin.src, props.skin.kind], mountSkin);
 onBeforeUnmount(() => {
   dispose?.();
   dispose = null;
@@ -95,7 +111,6 @@ onBeforeUnmount(() => {
   /* Let hits fall through to .stage's data-tauri-drag-region so drag works on the pet */
   pointer-events: none;
 }
-.host :deep(canvas),
 .host :deep(img.pet) {
   width: 100%;
   height: 100%;
@@ -105,6 +120,24 @@ onBeforeUnmount(() => {
   border: 0;
   outline: none;
   filter: drop-shadow(0 18px 28px rgba(60, 35, 20, 0.18));
+  pointer-events: none;
+}
+.host :deep(canvas) {
+  display: block;
+  /* Let PIXI own canvas buffer/CSS size; only clamp overflow */
+  max-width: 100%;
+  max-height: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  filter: drop-shadow(0 18px 28px rgba(60, 35, 20, 0.18));
+  pointer-events: none;
+}
+.skin-error {
+  color: #a87b45;
+  font-size: 12px;
+  text-align: center;
+  padding: 12px;
   pointer-events: none;
 }
 </style>

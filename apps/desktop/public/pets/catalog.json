@@ -7,7 +7,11 @@
       "kind": "image",
       "preview": "/pets/guofeng/apsara.png",
       "src": "/pets/guofeng/apsara.png",
-      "tags": ["古风", "插画", "默认"],
+      "tags": [
+        "古风",
+        "插画",
+        "默认"
+      ],
       "blurb": "敦煌飞天风插画（静态），默认皮肤"
     },
     {
@@ -16,7 +20,10 @@
       "kind": "live2d",
       "preview": "/pets/live2d/mao/Mao.2048/texture_00.png",
       "src": "/pets/live2d/mao/Mao.model3.json",
-      "tags": ["Live2D", "样例"],
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
       "blurb": "Live2D 官方样例 · 动态"
     },
     {
@@ -25,7 +32,10 @@
       "kind": "live2d",
       "preview": "/pets/live2d/hiyori/Hiyori.2048/texture_00.png",
       "src": "/pets/live2d/hiyori/Hiyori.model3.json",
-      "tags": ["Live2D", "样例"],
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
       "blurb": "Live2D 官方样例 · 动态"
     },
     {
@@ -34,7 +44,10 @@
       "kind": "live2d",
       "preview": "/pets/live2d/haru/Haru.2048/texture_00.png",
       "src": "/pets/live2d/haru/Haru.model3.json",
-      "tags": ["Live2D", "样例"],
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
       "blurb": "Live2D 官方样例 · 动态"
     },
     {
@@ -43,7 +56,10 @@
       "kind": "live2d",
       "preview": "/pets/live2d/rice/Rice.2048/texture_00.png",
       "src": "/pets/live2d/rice/Rice.model3.json",
-      "tags": ["Live2D", "样例"],
+      "tags": [
+        "Live2D",
+        "样例"
+      ],
       "blurb": "Live2D 官方样例 · 动态"
     },
     {
@@ -52,17 +68,12 @@
       "kind": "live2d",
       "preview": "/pets/live2d/wanko/Wanko.1024/texture_00.png",
       "src": "/pets/live2d/wanko/Wanko.model3.json",
-      "tags": ["Live2D", "样例", "小狗"],
+      "tags": [
+        "Live2D",
+        "样例",
+        "小狗"
+      ],
       "blurb": "Live2D 官方样例 · 小狗动态"
-    },
-    {
-      "id": "live2d-ren",
-      "name": "Ren",
-      "kind": "live2d",
-      "preview": "/pets/live2d/ren/Ren.2048/texture_00.png",
-      "src": "/pets/live2d/ren/Ren.model3.json",
-      "tags": ["Live2D", "样例"],
-      "blurb": "Live2D 官方样例 · 动态"
     }
   ]
 }
