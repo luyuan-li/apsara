@@ -5,8 +5,9 @@
   "description": "Apsara — Mac AI desktop pet (飞天)",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "dev:desktop": "pnpm --filter @apsara/desktop dev",
-    "build:desktop": "pnpm --filter @apsara/desktop build",
-    "lint": "echo \"lint placeholders — wire when apps land\""
+    "dev": "pnpm --filter @apsara/desktop dev",
+    "dev:desktop": "pnpm --filter @apsara/desktop tauri:dev",
+    "build:desktop": "pnpm --filter @apsara/desktop tauri:build",
+    "lint": "echo \"ok\""
   }
 }

@@ -7,6 +7,8 @@ export interface ToolDef {
   parameters: Record<string, unknown>;
 }
 
+export const PATH_ALLOWLIST = ["Desktop", "Downloads", "Documents"] as const;
+
 export const MVP_TOOLS: ToolDef[] = [
   {
     name: "list_desktop",
@@ -48,3 +50,5 @@ export const MVP_TOOLS: ToolDef[] = [
     },
   },
 ];
+
+export type { ToolDef as ApsaraToolDef };

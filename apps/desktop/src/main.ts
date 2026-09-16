@@ -1,2 +1,5 @@
-// Vue app bootstrap placeholder — see docs/architecture.md
-console.info("[apsara] desktop renderer scaffold");
+import { createApp } from "vue";
+import App from "./App.vue";
+import "./styles/main.css";
+
+createApp(App).mount("#app");
