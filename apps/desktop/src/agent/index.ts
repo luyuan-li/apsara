@@ -1,0 +1,1 @@
+export {}; // PetAgent wiring placeholder

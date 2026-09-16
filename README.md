@@ -1,22 +1,43 @@
 # Apsara
 
-> 飞天 · Mac AI 桌宠 — transparent Live2D companion with a thin agent that can (carefully) use your desktop.
+> 飞天 · Mac AI 桌宠 — a transparent Live2D (or sprite) companion with a thin agent that can carefully use your desktop.
 
-**Status:** early scaffold / design-first open source. Not a polished app yet.
+**Status:** early open-source scaffold (architecture + empty modules). Not a runnable pet yet.
 
 ## Why Apsara
-Apsara (飞天) is a macOS desktop pet: a floating character you can chat with, backed by a small agent that calls confirmed tools (e.g. move a file to Trash — never silent `rm`).
+Apsara (飞天) aims to be a macOS desktop pet you can chat with. The agent may call tools such as moving a file to **Trash** — always with confirmation, never silent `rm`.
 
 ## Stack (planned)
-- **Shell:** Tauri 2 (transparent window, tray, filesystem bridge)
-- **UI:** Vue 3 + TypeScript + Vite
-- **Pet:** PixiJS + Live2D (sprite placeholder for MVP)
-- **Brain:** OpenAI-compatible / Ollama function calling
+| Layer | Choice |
+|-------|--------|
+| Shell | Tauri 2 (transparent window, tray, FS bridge) |
+| UI | Vue 3 + TypeScript + Vite |
+| Pet | PixiJS + Live2D; MVP sprite placeholder |
+| Brain | OpenAI-compatible / Ollama function calling |
+
+## Repo layout
+```
+apps/desktop/     Tauri + Vue app
+packages/shared/  Tool schemas & IPC types
+packages/mock-llm Local echo LLM for UI wiring
+assets/           Personas, placeholder art, Live2D later
+docs/             Architecture & protocols
+```
 
 ## Docs
-- [Architecture & directory design](docs/architecture.md)
+- [Architecture & directory design](docs/architecture.md)（中文）
+- [Tool protocol](docs/tool-protocol.md)
+- [macOS notes](docs/mac-permissions.md)
+
+## Development (soon)
+```bash
+pnpm install
+pnpm dev:desktop   # after Vite + tauri are wired
+```
+
+Copy `.env.example` → `.env` and fill API settings when you connect a real model.
 
 ## License
 MIT — see [LICENSE](LICENSE).
 
-Live2D sample models and Cubism SDK have their **own** licenses; do not assume MIT covers third-party model assets.
+**Live2D Cubism SDK and third-party models are NOT covered by MIT.** Respect their licenses separately.

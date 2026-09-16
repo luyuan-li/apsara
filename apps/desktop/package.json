@@ -1,0 +1,14 @@
+{
+  "name": "@apsara/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"TODO: wire Vite + tauri dev — see docs/architecture.md\"",
+    "build": "echo \"TODO: wire Vite + tauri build\""
+  },
+  "dependencies": {
+    "@apsara/shared": "workspace:*",
+    "@apsara/mock-llm": "workspace:*"
+  }
+}
